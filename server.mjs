@@ -188,7 +188,13 @@ const server = http.createServer(async (req, res) => {
           saveHistory()
         }
         jobs.set(jobId, { log: r.log, done: true, error: !r.ok })
-        console.log(`[${new Date().toISOString()}] 解析结束 job=${jobId} ok=${r.ok}`)
+        if (r.ok) {
+          console.log(`[${new Date().toISOString()}] 解析结束 job=${jobId} ok=true`)
+        } else {
+          const lines = String(r.log || '').split('\n').filter(Boolean)
+          const tail = lines.slice(-3).join(' | ').slice(0, 300)
+          console.log(`[${new Date().toISOString()}] 解析结束 job=${jobId} ok=false 原因: ${tail}`)
+        }
       })
       return
     }
