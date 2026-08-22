@@ -41,11 +41,11 @@ fi
 
 # 3. 创建配置文件（不存在时）
 if [ ! -f config.json ]; then
-  cat > config.json <<'EOF'
+  cat > config.json <<EOF
 {
   "port": 8090,
   "host": "0.0.0.0",
-  "downloadDir": "下载/视频",
+  "downloadDir": "$HOME/下载/视频",
   "cookies": "firefox"
 }
 EOF

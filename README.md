@@ -12,11 +12,16 @@
 - 🍪 支持 cookies（抖音等需验证的站点）
 - 🚫 无开机自启依赖（兼容无 systemd 的环境：Termux、容器、轻量系统）
 
-## 🚀 一键部署
+## 🚀 一键部署（任何主机，傻瓜式）
 
 ```bash
+git clone https://github.com/haitao-520/yt-dlp-web.git
+cd yt-dlp-web
 bash install.sh
+nohup node server.mjs >/dev/null 2>&1 &
 ```
+
+> 项目不包含任何本机专属配置：下载目录自动基于当前用户主目录，yt-dlp 内置在 bin/，配置文件由脚本自动生成。
 
 脚本会自动：
 1. 检测 Node.js（需 18+）
@@ -40,7 +45,7 @@ nohup node server.mjs >/dev/null 2>&1 &
 {
   "port": 8090,          // 端口
   "host": "0.0.0.0",     // 监听地址（0.0.0.0 = 局域网可访问）
-  "downloadDir": "下载/视频",  // 下载保存目录
+  "downloadDir": "$HOME/下载/视频",  // 下载保存目录（默认基于用户主目录）
   "cookies": "firefox"   // cookies 来源: "" 不用 / "firefox" 读浏览器 / 或 cookie 文件路径
 }
 ```

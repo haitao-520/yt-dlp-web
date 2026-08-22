@@ -27,7 +27,7 @@ const HOST = config.host
 // yt-dlp 路径：项目内 bin/yt-dlp 优先，其次系统安装
 const YTDLP = existsSync(path.join(__dirname, 'bin', 'yt-dlp'))
   ? path.join(__dirname, 'bin', 'yt-dlp')
-  : (existsSync('/home/lutao/.local/bin/yt-dlp') ? '/home/lutao/.local/bin/yt-dlp' : 'yt-dlp')
+  : 'yt-dlp'
 
 const jobs = new Map()
 let jobSeq = 0
