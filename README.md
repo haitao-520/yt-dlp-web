@@ -64,7 +64,6 @@ yt-dlp-web/
 ```bash
 node server.mjs           # 直接运行（需已安装 yt-dlp 或项目 bin/ 内有）
 ```
-```
 
 ## ⚠️ 注意
 
