@@ -42,8 +42,8 @@ async function listFiles() {
     const p = path.join(DOWNLOAD_DIR, name)
     try {
       const s = await stat(p)
-      // 只显示最终完成的文件，过滤 .part 和中间格式文件(.fXXX.)
-      if (s.isFile() && !name.endsWith('.part') && !/\.f\d+(\.|$)/.test(name) && !name.startsWith('.')) {
+      // 只显示最终完成的文件，过滤 .part/中间格式/cookies 等杂项
+      if (s.isFile() && !name.endsWith('.part') && !/\.f\d+(\.|$)/.test(name) && !name.startsWith('.') && name !== 'cookies.txt') {
         files.push({ name, size: (s.size / 1048576).toFixed(1) + ' MB', time: new Date(s.mtimeMs).toLocaleString('zh-CN', { hour12: false }), mtime: s.mtimeMs })
       }
     } catch {}
@@ -138,7 +138,10 @@ function runYtDlp(url, jobId) {
   return new Promise((resolve) => {
     const args = ['--progress', '--newline']
     if (config.cookies === 'firefox') args.push('--cookies-from-browser', 'firefox')
-    else if (config.cookies && existsSync(config.cookies)) args.push('--cookies', config.cookies)
+    else if (config.cookies) {
+      const cookiePath = path.isAbsolute(config.cookies) ? config.cookies : path.join(__dirname, config.cookies)
+      if (existsSync(cookiePath)) args.push('--cookies', cookiePath)
+    }
     args.push(url)
     const child = spawn(YTDLP, args, { cwd: DOWNLOAD_DIR })
     let log = ''
