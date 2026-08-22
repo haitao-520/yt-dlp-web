@@ -159,6 +159,43 @@ function runYtDlp(url, jobId) {
   })
 }
 
+// 刷新 cookies（调用 refresh-cookies.sh 自动获取抖音+B站匿名 cookies）
+function refreshCookies() {
+  return new Promise((resolve) => {
+    const sh = path.join(__dirname, 'refresh-cookies.sh')
+    if (!existsSync(sh)) return resolve(false)
+    const p = spawn('bash', [sh], { cwd: __dirname })
+    p.on('close', () => {
+      const ok = existsSync(path.join(__dirname, 'cookies.txt'))
+      console.log(`[${new Date().toISOString()}] cookies 刷新: ${ok ? '成功' : '失败'}`)
+      resolve(ok)
+    })
+    p.on('error', () => { console.log(`[${new Date().toISOString()}] cookies 刷新失败`); resolve(false) })
+  })
+}
+
+// 完成一个任务：记录归属 + 更新状态 + 日志
+function finishJob(jobId, r) {
+  const job = jobs.get(jobId)
+  if (r.ok && job?.dev) {
+    const dests = [...r.log.matchAll(/Destination: (.+)/g)].map(m => path.basename(m[1].trim()))
+    for (const f of dests) { history[f] = job.dev }
+    saveHistory()
+  }
+  jobs.set(jobId, { log: r.log, done: true, error: !r.ok })
+  if (r.ok) {
+    console.log(`[${new Date().toISOString()}] 解析结束 job=${jobId} ok=true`)
+  } else {
+    const lines = String(r.log || '').split('\n').filter(Boolean)
+    const tail = lines.slice(-3).join(' | ').slice(0, 300)
+    console.log(`[${new Date().toISOString()}] 解析结束 job=${jobId} ok=false 原因: ${tail}`)
+  }
+}
+
+// 启动时刷新 cookies + 每 6 小时自动刷新
+refreshCookies()
+setInterval(refreshCookies, 6 * 60 * 60 * 1000)
+
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`)
   const remote = req.socket.remoteAddress
@@ -181,20 +218,15 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(200, { 'Content-Type': 'application/json' })
       res.end(JSON.stringify({ ok: true, job: jobId }))
       runYtDlp(videoUrl, jobId).then((r) => {
-        const job = jobs.get(jobId)
-        if (r.ok && job?.dev) {
-          const dests = [...r.log.matchAll(/Destination: (.+)/g)].map(m => path.basename(m[1].trim()))
-          for (const f of dests) { history[f] = job.dev }
-          saveHistory()
+        // cookies 过期：自动刷新并重试一次
+        if (!r.ok && /Fresh cookies/i.test(r.log)) {
+          console.log(`[${new Date().toISOString()}] cookies 过期，自动刷新并重试`)
+          refreshCookies().then(() => {
+            runYtDlp(videoUrl, jobId).then((r2) => finishJob(jobId, r2))
+          })
+          return
         }
-        jobs.set(jobId, { log: r.log, done: true, error: !r.ok })
-        if (r.ok) {
-          console.log(`[${new Date().toISOString()}] 解析结束 job=${jobId} ok=true`)
-        } else {
-          const lines = String(r.log || '').split('\n').filter(Boolean)
-          const tail = lines.slice(-3).join(' | ').slice(0, 300)
-          console.log(`[${new Date().toISOString()}] 解析结束 job=${jobId} ok=false 原因: ${tail}`)
-        }
+        finishJob(jobId, r)
       })
       return
     }
