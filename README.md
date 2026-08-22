@@ -9,8 +9,8 @@
 - ⏳ 实时下载进度（百分比 / 大小 / 速度 / 剩余时间）
 - 📁 解析历史按时间排序，完成后才显示
 - 🔒 多设备隔离：每个设备只看到自己解析的视频
-- 🔄 开机自启（systemd 用户服务）
 - 🍪 支持 cookies（抖音等需验证的站点）
+- 🚫 无开机自启依赖（兼容无 systemd 的环境：Termux、容器、轻量系统）
 
 ## 🚀 一键部署
 
@@ -22,9 +22,17 @@ bash install.sh
 1. 检测 Node.js（需 18+）
 2. 下载 yt-dlp 到项目 `bin/`（失败则回退 pip / apt）
 3. 生成 `config.json` 配置
-4. 注册 systemd 用户服务（开机自启）
 
-部署后浏览器打开 `http://本机局域网IP:8090` 即可使用。
+部署后**手动启动**：
+
+```bash
+# 前台运行
+node server.mjs
+# 或后台运行（关闭终端不退出）
+nohup node server.mjs >/dev/null 2>&1 &
+```
+
+浏览器打开 `http://本机局域网IP:8090` 即可使用。
 
 ## ⚙️ 配置（config.json）
 
@@ -37,7 +45,7 @@ bash install.sh
 }
 ```
 
-修改配置后重启服务：`systemctl --user restart yt-dlp-web`
+修改配置后重启进程即可。
 
 ## 📂 项目结构
 
@@ -54,10 +62,8 @@ yt-dlp-web/
 ## 🔧 手动部署
 
 ```bash
-npm i -g pnpm  # 无需
-node server.mjs           # 直接运行（需已安装 yt-dlp）
-# 或注册服务
-systemctl --user enable --now yt-dlp-web
+node server.mjs           # 直接运行（需已安装 yt-dlp 或项目 bin/ 内有）
+```
 ```
 
 ## ⚠️ 注意

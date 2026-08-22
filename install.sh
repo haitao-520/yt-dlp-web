@@ -1,8 +1,8 @@
 #!/bin/bash
 # ============================================================
-#  yt-dlp 视频解析网站 一键部署脚本
+#  yt-dlp 视频解析网站 部署脚本（手动启动，无开机自启）
 #  用法: bash install.sh
-#  部署后: 浏览器打开 http://本机局域网IP:8090
+#  部署后: 运行下面提示的启动命令，然后浏览器打开
 # ============================================================
 set -e
 cd "$(dirname "$0")"
@@ -58,41 +58,22 @@ if [ -n "$DL_DIR" ] && [ ! -d "$DL_DIR" ]; then
   mkdir -p "$DL_DIR" 2>/dev/null || true
 fi
 
-# 5. 注册 systemd 用户服务（开机自启）
-SERVICE_NAME="yt-dlp-web"
-SERVICE_FILE="$HOME/.config/systemd/user/${SERVICE_NAME}.service"
-mkdir -p "$HOME/.config/systemd/user"
-cat > "$SERVICE_FILE" <<EOF
-[Unit]
-Description=yt-dlp LAN downloader web UI
-After=network.target
-
-[Service]
-Type=simple
-ExecStart=$(command -v node) $(pwd)/server.mjs
-WorkingDirectory=$(pwd)
-Restart=on-failure
-RestartSec=3
-
-[Install]
-WantedBy=default.target
-EOF
-systemctl --user daemon-reload
-systemctl --user enable "$SERVICE_NAME" 2>/dev/null
-systemctl --user restart "$SERVICE_NAME"
-sleep 2
-
-# 6. 显示结果
+# 5. 启动说明（手动启动，不做开机自启）
 PORT=$(node -e "try{const c=require('./config.json');console.log(c.port||8090)}catch(e){console.log('8090')}")
 echo "======================================"
 echo "  ✅ 部署完成！"
 echo "======================================"
+echo "启动网站（前台运行）:"
+echo "  node server.mjs"
+echo
+echo "后台运行（关闭终端不退出）:"
+echo "  nohup node server.mjs >/dev/null 2>&1 &"
+echo
 echo "访问地址:"
 echo "  本机:      http://127.0.0.1:${PORT}"
 echo "  局域网IP:  http://$(hostname -I 2>/dev/null | awk '{print $1}'):${PORT}"
 echo
 echo "说明:"
 echo "  - cookies 配置为 firefox 时可解析抖音等需验证的站点"
-echo "  - 如需改端口/下载目录，编辑 config.json 后重启服务:"
-echo "      systemctl --user restart $SERVICE_NAME"
-echo "  - 开机自启已启用"
+echo "  - 如需改端口/下载目录，编辑 config.json 后重启"
+echo "  - 本项目不做开机自启（兼容无 systemd 的环境，如 Termux/容器）"
