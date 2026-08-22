@@ -138,7 +138,7 @@ function runYtDlp(url, jobId) {
   return new Promise((resolve) => {
     const args = ['--progress', '--newline']
     if (config.cookies === 'firefox') args.push('--cookies-from-browser', 'firefox')
-    else if (config.cookies) args.push('--cookies', config.cookies)
+    else if (config.cookies && existsSync(config.cookies)) args.push('--cookies', config.cookies)
     args.push(url)
     const child = spawn(YTDLP, args, { cwd: DOWNLOAD_DIR })
     let log = ''

@@ -46,7 +46,7 @@ if [ ! -f config.json ]; then
   "port": 8090,
   "host": "0.0.0.0",
   "downloadDir": "$HOME/下载/视频",
-  "cookies": "firefox"
+  "cookies": "cookies.txt"
 }
 EOF
   echo "✅ 已生成 config.json（可修改端口/下载目录/cookies）"
@@ -58,7 +58,12 @@ if [ -n "$DL_DIR" ] && [ ! -d "$DL_DIR" ]; then
   mkdir -p "$DL_DIR" 2>/dev/null || true
 fi
 
-# 5. 启动说明（手动启动，不做开机自启）
+# 5. 自动生成抖音 cookies（匿名即可，免登录）
+if [ ! -f cookies.txt ]; then
+  bash refresh-cookies.sh || echo "⚠️ cookies 自动获取失败，可稍后运行 bash refresh-cookies.sh 重试"
+fi
+
+# 6. 启动说明（手动启动，不做开机自启）
 PORT=$(node -e "try{const c=require('./config.json');console.log(c.port||8090)}catch(e){console.log('8090')}")
 echo "======================================"
 echo "  ✅ 部署完成！"
