@@ -9,7 +9,7 @@
 - ⏳ 实时下载进度（百分比 / 大小 / 速度 / 剩余时间）
 - 📁 解析历史按时间排序，完成后才显示
 - 🔒 多设备隔离：每个设备只看到自己解析的视频
-- 🍪 抖音 cookies **自动获取**（匿名即可，免登录免导出）
+- 🍪 抖音+B站 cookies **自动获取**（匿名即可，免登录免导出）
 - 🚫 无开机自启依赖（兼容无 systemd 的环境：Termux、容器、轻量系统）
 
 ## 🚀 一键部署（任何主机，傻瓜式）
@@ -73,5 +73,5 @@ node server.mjs           # 直接运行（需已安装 yt-dlp 或项目 bin/ �
 ## ⚠️ 注意
 
 - 依赖 **ffmpeg**（合并音视频）：`sudo apt install ffmpeg`
-- 抖音 cookies 自动生成：部署时脚本自动访问 douyin.com 获取匿名 cookies（`refresh-cookies.sh`），无需登录
+- 抖音+B站 cookies 自动生成：部署时脚本自动访问两个站点获取匿名 cookies（`refresh-cookies.sh`），无需登录
 - 局域网内任何人都可访问（家用 Wi-Fi 没问题，公共网络慎用）
